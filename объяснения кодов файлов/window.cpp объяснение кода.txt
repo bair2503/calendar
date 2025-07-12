@@ -1,0 +1,446 @@
+// Copyright (C) 2020 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+#include "window.h" // Подключает заголовочный файл window.h, содержащий объявления класса Window.
+
+#include <QCalendarWidget> // Подключает класс для виджета календаря.
+#include <QCheckBox> // Подключает класс для флажка.
+#include <QComboBox> // Подключает класс для выпадающего списка.
+#include <QDateEdit> // Подключает класс для редактирования дат.
+#include <QGridLayout> // Подключает класс для сеточного макета.
+#include <QGroupBox> // Подключает класс для группового виджета.
+#include <QLabel> // Подключает класс для меток.
+#include <QLocale> // Подключает класс для работы с локалями.
+#include <QTextCharFormat> // Подключает класс для форматирования текста.
+
+//! [0]
+Window::Window(QWidget *parent) // Конструктор класса Window, наследующего от QWidget.
+    : QWidget(parent) // Инициализация родительского класса.
+{
+    createPreviewGroupBox(); // Создает группу для предварительного просмотра.
+    createGeneralOptionsGroupBox(); // Создает группу для общих параметров.
+    createDatesGroupBox(); // Создает группу для выбора дат.
+    createTextFormatsGroupBox(); // Создает группу для текстовых форматов.
+
+    QGridLayout *layout = new QGridLayout; // Создает новый объект сеточного макета.
+    layout->addWidget(previewGroupBox, 0, 0); // Добавляет группу предварительного просмотра в ячейку (0, 0).
+    layout->addWidget(generalOptionsGroupBox, 0, 1); // Добавляет общие параметры в ячейку (0, 1).
+    layout->addWidget(datesGroupBox, 1, 0); // Добавляет группу дат в ячейку (1, 0).
+    layout->addWidget(textFormatsGroupBox, 1, 1); // Добавляет текстовые форматы в ячейку (1, 1).
+    layout->setSizeConstraint(QLayout::SetFixedSize); // Устанавливает фиксированный размер для макета.
+    setLayout(layout); // Применяет созданный макет к текущему виджету.
+
+    previewLayout->setRowMinimumHeight(0, calendar->sizeHint().height()); // Устанавливает минимальную высоту первой строки.
+    previewLayout->setColumnMinimumWidth(0, calendar->sizeHint().width()); // Устанавливает минимальную ширину первого столбца.
+
+    setWindowTitle(tr("Calendar Widget")); // Устанавливает заголовок окна на "Календарный виджет".
+}
+//! [0]
+
+void Window::localeChanged(int index) // Метод, вызываемый при изменении локали.
+{
+    const QLocale newLocale(localeCombo->itemData(index).toLocale()); // Создает новый объект QLocale на основе выбранной локали.
+    calendar->setLocale(newLocale); // Устанавливает новую локаль для календаря.
+    int newLocaleFirstDayIndex = firstDayCombo->findData(newLocale.firstDayOfWeek()); // Находит индекс первого дня недели для новой локали.
+    firstDayCombo->setCurrentIndex(newLocaleFirstDayIndex); // Устанавливает текущий индекс в комбинированном списке первого дня недели.
+}
+//! [1]
+void Window::firstDayChanged(int index) // Метод, вызываемый при изменении первого дня недели.
+{
+    calendar->setFirstDayOfWeek(Qt::DayOfWeek( // Устанавливает первый день недели для календаря.
+                                firstDayCombo->itemData(index).toInt())); // Получает значение из комбинированного списка по индексу и преобразует его в целое число.
+}
+//! [1]
+
+void Window::selectionModeChanged(int index) // Метод, вызываемый при изменении режима выбора.
+{
+    calendar->setSelectionMode(QCalendarWidget::SelectionMode( // Устанавливает режим выбора для календаря.
+                               selectionModeCombo->itemData(index).toInt())); // Получает значение из комбинированного списка по индексу и преобразует его в целое число.
+}
+
+void Window::horizontalHeaderChanged(int index) // Метод, вызываемый при изменении формата горизонтального заголовка.
+{
+    calendar->setHorizontalHeaderFormat(QCalendarWidget::HorizontalHeaderFormat( // Устанавливает формат горизонтального заголовка для календаря.
+        horizontalHeaderCombo->itemData(index).toInt())); // Получает значение из комбинированного списка по индексу и преобразует его в целое число.
+}
+
+void Window::verticalHeaderChanged(int index) // Метод, вызываемый при изменении формата вертикального заголовка.
+{
+    calendar->setVerticalHeaderFormat(QCalendarWidget::VerticalHeaderFormat( // Устанавливает формат вертикального заголовка для календаря.
+        verticalHeaderCombo->itemData(index).toInt())); // Получает значение из комбинированного списка по индексу и преобразует его в целое число.
+}
+
+//! [2]
+void Window::selectedDateChanged() // Метод, вызываемый при изменении выбранной даты.
+{
+    currentDateEdit->setDate(calendar->selectedDate()); // Устанавливает дату в поле редактирования на выбранную дату календаря.
+}
+//! [2]
+
+//! [3]
+void Window::minimumDateChanged(QDate date) // Метод, вызываемый при изменении минимальной даты.
+{
+    calendar->setMinimumDate(date); // Устанавливает минимальную дату для календаря.
+    maximumDateEdit->setDate(calendar->maximumDate()); // Обновляет поле редактирования максимальной даты на основе текущей максимальной даты календаря.
+}
+//! [3]
+
+//! [4]
+void Window::maximumDateChanged(QDate date) // Метод, вызываемый при изменении максимальной даты.
+{
+    calendar->setMaximumDate(date); // Устанавливает максимальную дату для календаря.
+    minimumDateEdit->setDate(calendar->minimumDate()); // Обновляет поле редактирования минимальной даты на основе текущей минимальной даты календаря.
+}
+//! [4]
+
+//! [5]
+void Window::weekdayFormatChanged() // Метод, вызываемый при изменении формата отображения дней недели.
+{
+    QTextCharFormat format; // Создает объект для форматирования текста.
+
+    format.setForeground(qvariant_cast<QColor>( // Устанавливает цвет текста для дней недели.
+        weekdayColorCombo->itemData(weekdayColorCombo->currentIndex()))); // Получает цвет из комбинированного списка по текущему индексу.
+    calendar->setWeekdayTextFormat(Qt::Monday, format); // Применяет формат к понедельнику.
+    calendar->setWeekdayTextFormat(Qt::Tuesday, format); // Применяет формат ко вторнику.
+    calendar->setWeekdayTextFormat(Qt::Wednesday, format); // Применяет формат к среде.
+    calendar->setWeekdayTextFormat(Qt::Thursday, format); // Применяет формат к четвергу.
+    calendar->setWeekdayTextFormat(Qt::Friday, format); // Применяет формат к пятнице.
+}
+//! [5]
+
+//! [6]
+void Window::weekendFormatChanged() // Метод, вызываемый при изменении формата отображения выходных.
+{
+    QTextCharFormat format; // Создает объект для форматирования текста.
+
+    format.setForeground(qvariant_cast<QColor>( // Устанавливает цвет текста для выходных.
+        weekendColorCombo->itemData(weekendColorCombo->currentIndex()))); // Получает цвет из комбинированного списка по текущему индексу.
+    calendar->setWeekdayTextFormat(Qt::Saturday, format); // Применяет формат к субботе.
+    calendar->setWeekdayTextFormat(Qt::Sunday, format); // Применяет формат к воскресенью.
+}
+//! [6]
+
+//! [7]
+void Window::reformatHeaders() // Метод, вызываемый для изменения формата заголовков.
+{
+    QString text = headerTextFormatCombo->currentText(); // Получает текущий текст из комбинированного списка форматов заголовков.
+    QTextCharFormat format; // Создает объект для форматирования текста.
+
+    if (text == tr("Bold")) // Проверяет, выбран ли формат "Жирный".
+        format.setFontWeight(QFont::Bold); // Устанавливает жирный шрифт.
+    else if (text == tr("Italic")) // Проверяет, выбран ли формат "Курсив".
+        format.setFontItalic(true); // Устанавливает курсивный шрифт.
+    else if (text == tr("Green")) // Проверяет, выбран ли цвет "Зеленый".
+        format.setForeground(Qt::green); // Устанавливает зеленый цвет текста.
+    calendar->setHeaderTextFormat(format); // Применяет формат к заголовкам календаря.
+}
+//! [7]
+
+//! [8]
+void Window::reformatCalendarPage() // Метод, вызываемый для изменения формата страниц календаря.
+{
+    QTextCharFormat mayFirstFormat; // Создает объект для форматирования текста для 1 мая.
+    const QDate mayFirst(calendar->yearShown(), 5, 1); // Создает объект даты для 1 мая текущего года.
+
+    QTextCharFormat firstFridayFormat; // Создает объект для форматирования текста для первого пятницы.
+    QDate firstFriday(calendar->yearShown(), calendar->monthShown(), 1); // Создает объект даты для первого дня текущего месяца.
+    while (firstFriday.dayOfWeek() != Qt::Friday) // Находит первую пятницу месяца.
+        firstFriday = firstFriday.addDays(1); // Увеличивает дату до первой пятницы.
+
+    if (firstFridayCheckBox->isChecked()) { // Проверяет, установлен ли флажок для первого пятницы.
+        firstFridayFormat.setForeground(Qt::blue); // Устанавливает синий цвет текста для первого пятницы.
+    } else { // Если флажок не установлен, восстанавливает обычный цвет для этого дня недели.
+        Qt::DayOfWeek dayOfWeek(static_cast<Qt::DayOfWeek>(firstFriday.dayOfWeek())); // Получает день недели для первой пятницы.
+        firstFridayFormat.setForeground(calendar->weekdayTextFormat(dayOfWeek).foreground()); // Устанавливает цвет текста по умолчанию для этого дня.
+    }
+
+    calendar->setDateTextFormat(firstFriday, firstFridayFormat); // Применяет формат к первой пятнице.
+
+    // Если установлен флажок "1 мая в красном", он всегда имеет приоритет над "Первой пятницей в синем".
+    if (mayFirstCheckBox->isChecked()) {
+        mayFirstFormat.setForeground(Qt::red); // Устанавливает красный цвет текста для 1 мая.
+    } else if (!firstFridayCheckBox->isChecked() || firstFriday != mayFirst) {
+        // Убедимся, что "1 мая в красном" не будет сброшен, когда мы восстанавливаем
+        // обычный цвет для 1 мая.
+        Qt::DayOfWeek dayOfWeek(static_cast<Qt::DayOfWeek>(mayFirst.dayOfWeek())); // Получает день недели для 1 мая.
+        calendar->setDateTextFormat(mayFirst, calendar->weekdayTextFormat(dayOfWeek)); // Восстанавливает обычный цвет для 1 мая.
+    }
+
+    calendar->setDateTextFormat(mayFirst, mayFirstFormat); // Применяет формат к 1 мая.
+}
+//! [8]
+
+//! [9]
+void Window::createPreviewGroupBox() // Метод для создания группы предварительного просмотра.
+{
+    previewGroupBox = new QGroupBox(tr("Preview")); // Создает новый групповой виджет с заголовком "Предварительный просмотр".
+
+    calendar = new QCalendarWidget; // Создает новый виджет календаря.
+    calendar->setMinimumDate(QDate(1900, 1, 1)); // Устанавливает минимальную дату для календаря.
+    calendar->setMaximumDate(QDate(3000, 1, 1)); // Устанавливает максимальную дату для календаря.
+    calendar->setGridVisible(true); // Активирует отображение сетки в календаре.
+
+    connect(calendar, &QCalendarWidget::currentPageChanged, // Подключает сигнал изменения страницы к слоту переформатирования календаря.
+            this, &Window::reformatCalendarPage);
+
+    previewLayout = new QGridLayout; // Создает новый сеточный макет для группы предварительного просмотра.
+    previewLayout->addWidget(calendar, 0, 0, Qt::AlignCenter); // Добавляет календарь в макет, выравнивая по центру.
+    previewGroupBox->setLayout(previewLayout); // Устанавливает созданный макет для группового виджета.
+}
+//! [9]
+
+// TODO: использовать loc.name() в качестве метки (но с подчеркиванием вместо косой черты)
+// TODO: использовать locale() == loc вместо сравнения только языка и территории
+// Необходим человек, знакомый с этим примером, чтобы разобраться с последствиями
+//! [10]
+void Window::createGeneralOptionsGroupBox() // Метод для создания группы общих настроек.
+{
+    generalOptionsGroupBox = new QGroupBox(tr("General Options")); // Создает новый групповой виджет с заголовком "Общие настройки".
+
+    localeCombo = new QComboBox; // Создает комбинированный список для выбора локали.
+    int curLocaleIndex = -1; // Индекс текущей локали.
+    int index = 0; // Индекс для перебора локалей.
+    for (int _lang = QLocale::C; _lang <= QLocale::LastLanguage; ++_lang) { // Перебор всех языков.
+        QLocale::Language lang = static_cast<QLocale::Language>(_lang); // Преобразует целое число в язык.
+        const auto locales = QLocale::matchingLocales(lang, QLocale::AnyScript, QLocale::AnyTerritory); // Получает все подходящие локали для данного языка.
+        for (auto loc : locales) { // Перебирает все подходящие локали.
+            QString label = QLocale::languageToString(lang); // Получает строковое представление языка.
+            auto territory = loc.territory(); // Получает территорию локали.
+            label += QLatin1Char('/'); // Добавляет символ '/' к метке.
+            label += QLocale::territoryToString(territory); // Добавляет строковое представление территории к метке.
+            if (locale().language() == lang && locale().territory() == territory) // Проверяет, совпадает ли текущая локаль с локалью из списка.
+                curLocaleIndex = index; // Устанавливает индекс текущей локали.
+            localeCombo->addItem(label, loc); // Добавляет элемент в комбинированный список.
+            ++index; // Увеличивает индекс.
+        }
+    }
+    if (curLocaleIndex != -1) // Если текущая локаль найдена.
+        localeCombo->setCurrentIndex(curLocaleIndex); // Устанавливает текущий индекс в комбинированном списке.
+    localeLabel = new QLabel(tr("&Locale")); // Создает метку для локали.
+    localeLabel->setBuddy(localeCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+    firstDayCombo = new QComboBox; // Создает комбинированный список для выбора первого дня недели.
+    firstDayCombo->addItem(tr("Sunday"), Qt::Sunday); // Добавляет элемент "Воскресенье".
+    firstDayCombo->addItem(tr("Monday"), Qt::Monday); // Добавляет элемент "Понедельник".
+    firstDayCombo->addItem(tr("Tuesday"), Qt::Tuesday); // Добавляет элемент "Вторник".
+    firstDayCombo->addItem(tr("Wednesday"), Qt::Wednesday); // Добавляет элемент "Среда".
+    firstDayCombo->addItem(tr("Thursday"), Qt::Thursday); // Добавляет элемент "Четверг".
+    firstDayCombo->addItem(tr("Friday"), Qt::Friday); // Добавляет элемент "Пятница".
+    firstDayCombo->addItem(tr("Saturday"), Qt::Saturday); // Добавляет элемент "Суббота".
+
+    firstDayLabel = new QLabel(tr("Wee&k starts on:")); // Создает метку для выбора первого дня недели.
+    firstDayLabel->setBuddy(firstDayCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+    selectionModeCombo = new QComboBox; // Создает комбинированный список для выбора режима выбора.
+    selectionModeCombo->addItem(tr("Single selection"), QCalendarWidget::SingleSelection); // Добавляет элемент для одиночного выбора.
+    selectionModeCombo->addItem(tr("None"), QCalendarWidget::NoSelection); // Добавляет элемент "Нет выбора".
+
+    selectionModeLabel = new QLabel(tr("&Selection mode:")); // Создает метку для режима выбора.
+    selectionModeLabel->setBuddy(selectionModeCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+    gridCheckBox = new QCheckBox(tr("&Grid")); // Создает флажок для отображения сетки.
+    gridCheckBox->setChecked(calendar->isGridVisible()); // Устанавливает состояние флажка в соответствии с видимостью сетки календаря.
+
+    navigationCheckBox = new QCheckBox(tr("&Navigation bar")); // Создает флажок для отображения панели навигации.
+    navigationCheckBox->setChecked(true); // Устанавливает флажок как отмеченный.
+
+    horizontalHeaderCombo = new QComboBox; // Создает комбинированный список для выбора формата горизонтального заголовка.
+    horizontalHeaderCombo->addItem(tr("Single letter day names"), QCalendarWidget::SingleLetterDayNames); // Добавляет элемент для однобуквенных названий дней.
+    horizontalHeaderCombo->addItem(tr("Short day names"), QCalendarWidget::ShortDayNames); // Добавляет элемент для коротких названий дней.
+    horizontalHeaderCombo->addItem(tr("None"), QCalendarWidget::NoHorizontalHeader); // Добавляет элемент "Нет заголовка".
+    horizontalHeaderCombo->setCurrentIndex(1); // Устанавливает текущий индекс на второй элемент.
+
+    horizontalHeaderLabel = new QLabel(tr("&Horizontal header:")); // Создает метку для горизонтального заголовка.
+    horizontalHeaderLabel->setBuddy(horizontalHeaderCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+    verticalHeaderCombo = new QComboBox; // Создает комбинированный список для выбора формата вертикального заголовка.
+    verticalHeaderCombo->addItem(tr("ISO week numbers"), QCalendarWidget::ISOWeekNumbers); // Добавляет элемент для ISO-нумерации недель.
+    verticalHeaderCombo->addItem(tr("None"), QCalendarWidget::NoVerticalHeader); // Добавляет элемент "Нет заголовка".
+
+    verticalHeaderLabel = new QLabel(tr("&Vertical header:")); // Создает метку для вертикального заголовка.
+    verticalHeaderLabel->setBuddy(verticalHeaderCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+//! [11]
+    connect(localeCombo, &QComboBox::currentIndexChanged, // Подключает изменение текущего индекса локали к слоту.
+            this, &Window::localeChanged);
+    connect(firstDayCombo, &QComboBox::currentIndexChanged, // Подключает изменение текущего индекса первого дня к слоту.
+            this, &Window::firstDayChanged);
+    connect(selectionModeCombo, &QComboBox::currentIndexChanged, // Подключает изменение режима выбора к слоту.
+            this, &Window::selectionModeChanged);
+    connect(gridCheckBox, &QCheckBox::toggled, // Подключает переключение видимости сетки к слоту.
+            calendar, &QCalendarWidget::setGridVisible);
+    connect(navigationCheckBox, &QCheckBox::toggled, // Подключает переключение видимости панели навигации к слоту.
+            calendar, &QCalendarWidget::setNavigationBarVisible);
+    connect(horizontalHeaderCombo, &QComboBox::currentIndexChanged, // Подключает изменение формата горизонтального заголовка к слоту.
+            this, &Window::horizontalHeaderChanged);
+    connect(verticalHeaderCombo, &QComboBox::currentIndexChanged, // Подключает изменение формата вертикального заголовка к слоту.
+            this, &Window::verticalHeaderChanged);
+//! [11]
+    QHBoxLayout *checkBoxLayout = new QHBoxLayout; // Создает горизонтальный макет для флажков.
+    checkBoxLayout->addWidget(gridCheckBox); // Добавляет флажок для отображения сетки.
+    checkBoxLayout->addStretch(); // Добавляет растяжение для выравнивания флажков.
+    checkBoxLayout->addWidget(navigationCheckBox); // Добавляет флажок для отображения панели навигации.
+
+    QGridLayout *outerLayout = new QGridLayout; // Создает сеточный макет для размещения элементов.
+    outerLayout->addWidget(localeLabel, 0, 0); // Добавляет метку локали в ячейку (0, 0).
+    outerLayout->addWidget(localeCombo, 0, 1); // Добавляет комбинированный список локалей в ячейку (0, 1).
+    outerLayout->addWidget(firstDayLabel, 1, 0); // Добавляет метку первого дня недели в ячейку (1, 0).
+    outerLayout->addWidget(firstDayCombo, 1, 1); // Добавляет комбинированный список для выбора первого дня в ячейку (1, 1).
+    outerLayout->addWidget(selectionModeLabel, 2, 0); // Добавляет метку режима выбора в ячейку (2, 0).
+    outerLayout->addWidget(selectionModeCombo, 2, 1); // Добавляет комбинированный список режима выбора в ячейку (2, 1).
+    outerLayout->addLayout(checkBoxLayout, 3, 0, 1, 2); // Добавляет горизонтальный макет с флажками в ячейку (3, 0), занимая 1 строку и 2 столбца.
+    outerLayout->addWidget(horizontalHeaderLabel, 4, 0); // Добавляет метку горизонтального заголовка в ячейку (4, 0).
+    outerLayout->addWidget(horizontalHeaderCombo, 4, 1); // Добавляет комбинированный список горизонтального заголовка в ячейку (4, 1).
+    outerLayout->addWidget(verticalHeaderLabel, 5, 0); // Добавляет метку вертикального заголовка в ячейку (5, 0).
+    outerLayout->addWidget(verticalHeaderCombo, 5, 1); // Добавляет комбинированный список вертикального заголовка в ячейку (5, 1).
+    generalOptionsGroupBox->setLayout(outerLayout); // Устанавливает созданный макет для группового виджета общих настроек.
+
+//! [12]
+    firstDayChanged(firstDayCombo->currentIndex()); // Вызывает метод для обработки изменения первого дня недели.
+    selectionModeChanged(selectionModeCombo->currentIndex()); // Вызывает метод для обработки изменения режима выбора.
+    horizontalHeaderChanged(horizontalHeaderCombo->currentIndex()); // Вызывает метод для обработки изменения горизонтального заголовка.
+    verticalHeaderChanged(verticalHeaderCombo->currentIndex()); // Вызывает метод для обработки изменения вертикального заголовка.
+}
+//! [12]
+
+//! [13]
+void Window::createDatesGroupBox() // Метод для создания группы дат.
+{
+    datesGroupBox = new QGroupBox(tr("Dates")); // Создает новый групповой виджет с заголовком "Даты".
+
+    minimumDateEdit = new QDateEdit; // Создает элемент для редактирования минимальной даты.
+    minimumDateEdit->setDisplayFormat("MMM d yyyy"); // Устанавливает формат отображения даты.
+    minimumDateEdit->setDateRange(calendar->minimumDate(), // Устанавливает диапазон дат.
+                                  calendar->maximumDate());
+    minimumDateEdit->setDate(calendar->minimumDate()); // Устанавливает минимальную дату по умолчанию.
+
+    minimumDateLabel = new QLabel(tr("&Minimum Date:")); // Создает метку для минимальной даты.
+    minimumDateLabel->setBuddy(minimumDateEdit); // Устанавливает связь между меткой и элементом редактирования.
+
+    currentDateEdit = new QDateEdit; // Создает элемент для редактирования текущей даты.
+    currentDateEdit->setDisplayFormat("MMM d yyyy"); // Устанавливает формат отображения даты.
+    currentDateEdit->setDate(calendar->selectedDate()); // Устанавливает текущую дату по умолчанию.
+    currentDateEdit->setDateRange(calendar->minimumDate(), // Устанавливает диапазон дат.
+                                  calendar->maximumDate());
+
+    currentDateLabel = new QLabel(tr("&Current Date:")); // Создает метку для текущей даты.
+    currentDateLabel->setBuddy(currentDateEdit); // Устанавливает связь между меткой и элементом редактирования.
+
+    maximumDateEdit = new QDateEdit; // Создает элемент для редактирования максимальной даты.
+    maximumDateEdit->setDisplayFormat("MMM d yyyy"); // Устанавливает формат отображения даты.
+    maximumDateEdit->setDateRange(calendar->minimumDate(), // Устанавливает диапазон дат.
+                                  calendar->maximumDate());
+    maximumDateEdit->setDate(calendar->maximumDate()); // Устанавливает максимальную дату по умолчанию.
+
+    maximumDateLabel = new QLabel(tr("Ma&ximum Date:")); // Создает метку для максимальной даты.
+    maximumDateLabel->setBuddy(maximumDateEdit); // Устанавливает связь между меткой и элементом редактирования.
+
+//! [13] 
+//! [14]
+    connect(currentDateEdit, &QDateEdit::dateChanged, // Подключает изменение текущей даты к слоту календаря.
+            calendar, &QCalendarWidget::setSelectedDate);
+    connect(calendar, &QCalendarWidget::selectionChanged, // Подключает изменение выбранной даты в календаре к слоту.
+            this, &Window::selectedDateChanged);
+    connect(minimumDateEdit, &QDateEdit::dateChanged, // Подключает изменение минимальной даты к слоту.
+            this, &Window::minimumDateChanged);
+    connect(maximumDateEdit, &QDateEdit::dateChanged, // Подключает изменение максимальной даты к слоту.
+            this, &Window::maximumDateChanged);
+//! [14]
+    QGridLayout *dateBoxLayout = new QGridLayout; // Создает сеточный макет для группы дат.
+    dateBoxLayout->addWidget(currentDateLabel, 1, 0); // Добавляет метку текущей даты в ячейку (1, 0).
+    dateBoxLayout->addWidget(currentDateEdit, 1, 1); // Добавляет элемент редактирования текущей даты в ячейку (1, 1).
+    dateBoxLayout->addWidget(minimumDateLabel, 0, 0); // Добавляет метку минимальной даты в ячейку (0, 0).
+    dateBoxLayout->addWidget(minimumDateEdit, 0, 1); // Добавляет элемент редактирования минимальной даты в ячейку (0, 1).
+    dateBoxLayout->addWidget(maximumDateLabel, 2, 0); // Добавляет метку максимальной даты в ячейку (2, 0).
+    dateBoxLayout->addWidget(maximumDateEdit, 2, 1); // Добавляет элемент редактирования максимальной даты в ячейку (2, 1).
+    dateBoxLayout->setRowStretch(3, 1); // Устанавливает растяжение для третьей строки, чтобы она занимала оставшееся пространство.
+
+    datesGroupBox->setLayout(dateBoxLayout); // Устанавливает созданный макет для группового виджета дат.
+//! [15]
+}
+//! [15]
+
+//! [16]
+void Window::createTextFormatsGroupBox() // Метод для создания группы форматов текста.
+{
+    textFormatsGroupBox = new QGroupBox(tr("Text Formats")); // Создает новый групповой виджет с заголовком "Форматы текста".
+
+    weekdayColorCombo = createColorComboBox(); // Создает комбинированный список для выбора цвета для будних дней.
+    weekdayColorCombo->setCurrentIndex(
+            weekdayColorCombo->findText(tr("Black"))); // Устанавливает черный цвет как текущий.
+
+    weekdayColorLabel = new QLabel(tr("&Weekday color:")); // Создает метку для цвета будних дней.
+    weekdayColorLabel->setBuddy(weekdayColorCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+    weekendColorCombo = createColorComboBox(); // Создает комбинированный список для выбора цвета для выходных.
+    weekendColorCombo->setCurrentIndex(
+            weekendColorCombo->findText(tr("Red"))); // Устанавливает красный цвет как текущий.
+
+    weekendColorLabel = new QLabel(tr("Week&end color:")); // Создает метку для цвета выходных.
+    weekendColorLabel->setBuddy(weekendColorCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+//! [16] //! [17]
+    headerTextFormatCombo = new QComboBox; // Создает комбинированный список для выбора формата текста заголовка.
+    headerTextFormatCombo->addItem(tr("Bold")); // Добавляет вариант "Жирный".
+    headerTextFormatCombo->addItem(tr("Italic")); // Добавляет вариант "Курсив".
+    headerTextFormatCombo->addItem(tr("Plain")); // Добавляет вариант "Обычный".
+
+    headerTextFormatLabel = new QLabel(tr("&Header text:")); // Создает метку для формата текста заголовка.
+    headerTextFormatLabel->setBuddy(headerTextFormatCombo); // Устанавливает связь между меткой и комбинированным списком.
+
+    firstFridayCheckBox = new QCheckBox(tr("&First Friday in blue")); // Создает флажок для выбора "Первый пятница в синем".
+
+    mayFirstCheckBox = new QCheckBox(tr("May &1 in red")); // Создает флажок для выбора "1 мая в красном".
+
+    //! [17] //! [18]
+    connect(weekdayColorCombo, &QComboBox::currentIndexChanged, // Подключает изменение цвета будних дней к слоту.
+            this, &Window::weekdayFormatChanged);
+    connect(weekdayColorCombo, &QComboBox::currentIndexChanged, // Подключает изменение цвета будних дней к слоту переформатирования.
+            this, &Window::reformatCalendarPage);
+    connect(weekendColorCombo, &QComboBox::currentIndexChanged, // Подключает изменение цвета выходных к слоту.
+            this, &Window::weekendFormatChanged);
+    connect(weekendColorCombo, &QComboBox::currentIndexChanged, // Подключает изменение цвета выходных к слоту переформатирования.
+            this, &Window::reformatCalendarPage);
+    connect(headerTextFormatCombo, &QComboBox::currentIndexChanged, // Подключает изменение формата текста заголовка к слоту.
+            this, &Window::reformatHeaders);
+    connect(firstFridayCheckBox, &QCheckBox::toggled, // Подключает переключение флажка первого пятницы к слоту переформатирования.
+            this, &Window::reformatCalendarPage);
+    connect(mayFirstCheckBox, &QCheckBox::toggled, // Подключает переключение флажка 1 мая к слоту переформатирования.
+            this, &Window::reformatCalendarPage);
+
+//! [18]
+    QHBoxLayout *checkBoxLayout = new QHBoxLayout; // Создает горизонтальный макет для флажков.
+    checkBoxLayout->addWidget(firstFridayCheckBox); // Добавляет флажок первого пятницы.
+    checkBoxLayout->addStretch(); // Добавляет растяжение для выравнивания флажков.
+    checkBoxLayout->addWidget(mayFirstCheckBox); // Добавляет флажок 1 мая.
+
+    QGridLayout *outerLayout = new QGridLayout; // Создает сеточный макет для размещения элементов.
+    outerLayout->addWidget(weekdayColorLabel, 0, 0); // Добавляет метку цвета будних дней в ячейку (0, 0).
+    outerLayout->addWidget(weekdayColorCombo, 0, 1); // Добавляет комбинированный список цвета будних дней в ячейку (0, 1).
+    outerLayout->addWidget(weekendColorLabel, 1, 0); // Добавляет метку цвета выходных в ячейку (1, 0).
+    outerLayout->addWidget(weekendColorCombo, 1, 1); // Добавляет комбинированный список цвета выходных в ячейку (1, 1).
+    outerLayout->addWidget(headerTextFormatLabel, 2, 0); // Добавляет метку формата текста заголовка в ячейку (2, 0).
+    outerLayout->addWidget(headerTextFormatCombo, 2, 1); // Добавляет комбинированный список формата текста заголовка в ячейку (2, 1).
+    outerLayout->addLayout(checkBoxLayout, 3, 0, 1, 2); // Добавляет горизонтальный макет с флажками в ячейку (3, 0), занимая 1 строку и 2 столбца.
+    textFormatsGroupBox->setLayout(outerLayout); // Устанавливает созданный макет для группового виджета форматов текста.
+
+    weekdayFormatChanged(); // Вызывает метод для обработки изменения формата будних дней.
+    weekendFormatChanged(); // Вызывает метод для обработки изменения формата выходных.
+//! [19]
+    reformatHeaders(); // Вызывает метод для переформатирования заголовков.
+    reformatCalendarPage(); // Вызывает метод для переформатирования страницы календаря.
+}
+//! [19]
+
+//! [20]
+QComboBox *Window::createColorComboBox() // Метод для создания комбинированного списка цветов.
+{
+    QComboBox *comboBox = new QComboBox; // Создает новый комбинированный список.
+    comboBox->addItem(tr("Red"), QColor(Qt::red)); // Добавляет элемент "Красный".
+    comboBox->addItem(tr("Blue"), QColor(Qt::blue)); // Добавляет элемент "Синий".
+    comboBox->addItem(tr("Black"), QColor(Qt::black)); // Добавляет элемент "Черный".
+    comboBox->addItem(tr("Magenta"), QColor(Qt::magenta)); // Добавляет элемент "Пурпурный".
+    return comboBox; // Возвращает созданный комбинированный список.
+}
+//! [20]
+

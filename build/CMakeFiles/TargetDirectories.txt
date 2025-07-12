@@ -1,0 +1,5 @@
+/Users/Skippi/calendarQt/build/CMakeFiles/calendarqt.dir
+/Users/Skippi/calendarQt/build/CMakeFiles/edit_cache.dir
+/Users/Skippi/calendarQt/build/CMakeFiles/rebuild_cache.dir
+/Users/Skippi/calendarQt/build/CMakeFiles/calendarqt_autogen_timestamp_deps.dir
+/Users/Skippi/calendarQt/build/CMakeFiles/calendarqt_autogen.dir

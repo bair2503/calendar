@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+2a70f8253fac736bc543ba729d7ba291 calendarqt_autogen/timestamp

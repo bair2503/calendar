@@ -1,0 +1,361 @@
+ Разработчик B - Реализация функциональности
+
+ День 1
+
+ Полный код (src_lib/window.cpp):
+```cpp
+include "window.h"
+include <QCalendarWidget>
+include <QCheckBox>
+include <QComboBox>
+include <QDateEdit>
+include <QGridLayout>
+include <QGroupBox>
+include <QLabel>
+include <QLocale>
+include <QTextCharFormat>
+
+Window::Window(QWidget parent)
+    : QWidget(parent)
+{
+    createPreviewGroupBox();
+    createGeneralOptionsGroupBox();
+    createDatesGroupBox();
+    createTextFormatsGroupBox();
+
+    QGridLayout layout = new QGridLayout;
+    layout->addWidget(previewGroupBox, 0, 0);
+    layout->addWidget(generalOptionsGroupBox, 0, 1);
+    layout->addWidget(datesGroupBox, 1, 0);
+    layout->addWidget(textFormatsGroupBox, 1, 1);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
+    setLayout(layout);
+
+    setWindowTitle(tr("Calendar Widget"));
+}
+
+void Window::createPreviewGroupBox()
+{
+    previewGroupBox = new QGroupBox(tr("Preview"));
+    calendar = new QCalendarWidget;
+    calendar->setMinimumDate(QDate(1900, 1, 1));
+    calendar->setMaximumDate(QDate(3000, 1, 1));
+    calendar->setGridVisible(true);
+    
+    previewLayout = new QGridLayout;
+    previewLayout->addWidget(calendar, 0, 0, Qt::AlignCenter);
+    previewGroupBox->setLayout(previewLayout);
+}
+```
+
+ Git команды:
+```bash
+git checkout feature/implementation
+git add src_lib/window.cpp
+git commit -m "фича: Базовая реализация Window
+- Добавлен конструктор класса
+- Реализовано создание превью календаря
+- Настроена базовая компоновка виджетов"
+git push origin feature/implementation
+```
+
+ День 2
+
+ Обновление кода (src_lib/window.cpp):
+```cpp
+void Window::createGeneralOptionsGroupBox()
+{
+    generalOptionsGroupBox = new QGroupBox(tr("General Options"));
+    
+    localeLabel = new QLabel(tr("&Locale"));
+    localeCombo = new QComboBox;
+    localeLabel->setBuddy(localeCombo);
+
+    // Заполнение списка локалей
+    const QLocale::Language nativeLanguage = QLocale().language();
+    for (int language = QLocale::C; language <= QLocale::LastLanguage; language++) {
+        QLocale::Language lang = static_cast<QLocale::Language>(language);
+        QLocale locale(lang);
+        if (locale.language() == lang) {
+            QString label = QLocale::languageToString(lang);
+            QLocale::Country country = locale.country();
+            label += QLatin1String(" (") + QLocale::countryToString(country) + QLatin1String(")");
+            localeCombo->addItem(label, locale);
+        }
+    }
+    
+    firstDayLabel = new QLabel(tr("Wee&k starts on:"));
+    firstDayCombo = new QComboBox;
+    firstDayLabel->setBuddy(firstDayCombo);
+
+    // Заполнение дней недели
+    firstDayCombo->addItem(tr("Sunday"), Qt::Sunday);
+    firstDayCombo->addItem(tr("Monday"), Qt::Monday);
+    firstDayCombo->addItem(tr("Tuesday"), Qt::Tuesday);
+    firstDayCombo->addItem(tr("Wednesday"), Qt::Wednesday);
+    firstDayCombo->addItem(tr("Thursday"), Qt::Thursday);
+    firstDayCombo->addItem(tr("Friday"), Qt::Friday);
+    firstDayCombo->addItem(tr("Saturday"), Qt::Saturday);
+
+    QGridLayout layout = new QGridLayout;
+    layout->addWidget(localeLabel, 0, 0);
+    layout->addWidget(localeCombo, 0, 1);
+    layout->addWidget(firstDayLabel, 1, 0);
+    layout->addWidget(firstDayCombo, 1, 1);
+    generalOptionsGroupBox->setLayout(layout);
+
+    // Подключение сигналов
+    connect(localeCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(localeChanged(int)));
+    connect(firstDayCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(firstDayChanged(int)));
+}
+
+void Window::localeChanged(int index)
+{
+    const QLocale newLocale(localeCombo->itemData(index).toLocale());
+    calendar->setLocale(newLocale);
+}
+
+void Window::firstDayChanged(int index)
+{
+    calendar->setFirstDayOfWeek(Qt::DayOfWeek(
+        firstDayCombo->itemData(index).toInt()));
+}
+```
+
+ Git команды:
+```bash
+git checkout feature/implementation
+git add src_lib/window.cpp
+git commit -m "фича: Реализация общих настроек
+- Добавлено создание группы общих настроек
+- Реализована локализация календаря
+- Добавлен выбор первого дня недели
+- Реализованы соответствующие слоты"
+git push origin feature/implementation
+```
+
+ День 3
+
+ Обновление кода (src_lib/window.cpp):
+```cpp
+void Window::createDatesGroupBox()
+{
+    datesGroupBox = new QGroupBox(tr("Dates"));
+
+    currentDateLabel = new QLabel(tr("&Current date:"));
+    currentDateEdit = new QDateEdit;
+    currentDateLabel->setBuddy(currentDateEdit);
+    currentDateEdit->setDisplayFormat("MMM d yyyy");
+    currentDateEdit->setDateRange(calendar->minimumDate(),
+                                calendar->maximumDate());
+    currentDateEdit->setDate(QDate::currentDate());
+
+    minimumDateLabel = new QLabel(tr("&Minimum date:"));
+    minimumDateEdit = new QDateEdit;
+    minimumDateLabel->setBuddy(minimumDateEdit);
+    minimumDateEdit->setDisplayFormat("MMM d yyyy");
+    minimumDateEdit->setDateRange(calendar->minimumDate(),
+                                calendar->maximumDate());
+    minimumDateEdit->setDate(calendar->minimumDate());
+
+    maximumDateLabel = new QLabel(tr("Ma&ximum date:"));
+    maximumDateEdit = new QDateEdit;
+    maximumDateLabel->setBuddy(maximumDateEdit);
+    maximumDateEdit->setDisplayFormat("MMM d yyyy");
+    maximumDateEdit->setDateRange(calendar->minimumDate(),
+                                calendar->maximumDate());
+    maximumDateEdit->setDate(calendar->maximumDate());
+
+    QGridLayout layout = new QGridLayout;
+    layout->addWidget(currentDateLabel, 0, 0);
+    layout->addWidget(currentDateEdit, 0, 1);
+    layout->addWidget(minimumDateLabel, 1, 0);
+    layout->addWidget(minimumDateEdit, 1, 1);
+    layout->addWidget(maximumDateLabel, 2, 0);
+    layout->addWidget(maximumDateEdit, 2, 1);
+    datesGroupBox->setLayout(layout);
+
+    connect(currentDateEdit, SIGNAL(dateChanged(QDate)),
+            calendar, SLOT(setSelectedDate(QDate)));
+    connect(calendar, SIGNAL(selectionChanged()),
+            this, SLOT(selectedDateChanged()));
+    connect(minimumDateEdit, SIGNAL(dateChanged(QDate)),
+            this, SLOT(minimumDateChanged(QDate)));
+    connect(maximumDateEdit, SIGNAL(dateChanged(QDate)),
+            this, SLOT(maximumDateChanged(QDate)));
+}
+
+void Window::selectedDateChanged()
+{
+    currentDateEdit->setDate(calendar->selectedDate());
+}
+
+void Window::minimumDateChanged(QDate date)
+{
+    calendar->setMinimumDate(date);
+    maximumDateEdit->setMinimumDate(date);
+}
+
+void Window::maximumDateChanged(QDate date)
+{
+    calendar->setMaximumDate(date);
+    minimumDateEdit->setMaximumDate(date);
+}
+```
+
+ Git команды:
+```bash
+git checkout feature/implementation
+git add src_lib/window.cpp
+git commit -m "фича: Реализация управления датами
+- Добавлено создание группы управления датами
+- Реализовано управление текущей датой
+- Добавлены ограничения минимальной и максимальной дат
+- Реализована синхронизация между виджетами"
+git push origin feature/implementation
+```
+
+ День 4
+
+ Обновление кода (src_lib/window.cpp):
+```cpp
+void Window::createTextFormatsGroupBox()
+{
+    textFormatsGroupBox = new QGroupBox(tr("Text Formats"));
+
+    weekdayColorLabel = new QLabel(tr("&Weekday color:"));
+    weekdayColorCombo = createColorComboBox();
+    weekdayColorLabel->setBuddy(weekdayColorCombo);
+
+    weekendColorLabel = new QLabel(tr("Week&end color:"));
+    weekendColorCombo = createColorComboBox();
+    weekendColorLabel->setBuddy(weekendColorCombo);
+
+    headerTextFormatLabel = new QLabel(tr("&Header text:"));
+    headerTextFormatCombo = new QComboBox;
+    headerTextFormatLabel->setBuddy(headerTextFormatCombo);
+    headerTextFormatCombo->addItem(tr("Bold"), QFont::Bold);
+    headerTextFormatCombo->addItem(tr("Italic"), QFont::StyleItalic);
+    headerTextFormatCombo->addItem(tr("Plain"), QFont::StyleNormal);
+
+    QGridLayout layout = new QGridLayout;
+    layout->addWidget(weekdayColorLabel, 0, 0);
+    layout->addWidget(weekdayColorCombo, 0, 1);
+    layout->addWidget(weekendColorLabel, 1, 0);
+    layout->addWidget(weekendColorCombo, 1, 1);
+    layout->addWidget(headerTextFormatLabel, 2, 0);
+    layout->addWidget(headerTextFormatCombo, 2, 1);
+    textFormatsGroupBox->setLayout(layout);
+
+    connect(weekdayColorCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(weekdayFormatChanged()));
+    connect(weekendColorCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(weekendFormatChanged()));
+    connect(headerTextFormatCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(reformatHeaders()));
+}
+
+void Window::weekdayFormatChanged()
+{
+    QTextCharFormat format;
+    format.setForeground(qvariant_cast<QColor>(
+        weekdayColorCombo->itemData(weekdayColorCombo->currentIndex())));
+    calendar->setWeekdayTextFormat(Qt::Monday, format);
+    calendar->setWeekdayTextFormat(Qt::Tuesday, format);
+    calendar->setWeekdayTextFormat(Qt::Wednesday, format);
+    calendar->setWeekdayTextFormat(Qt::Thursday, format);
+    calendar->setWeekdayTextFormat(Qt::Friday, format);
+}
+
+void Window::weekendFormatChanged()
+{
+    QTextCharFormat format;
+    format.setForeground(qvariant_cast<QColor>(
+        weekendColorCombo->itemData(weekendColorCombo->currentIndex())));
+    calendar->setWeekdayTextFormat(Qt::Saturday, format);
+    calendar->setWeekdayTextFormat(Qt::Sunday, format);
+}
+
+void Window::reformatHeaders()
+{
+    QTextCharFormat format;
+    format.setFontWeight(QFont::Weight(
+        headerTextFormatCombo->itemData(headerTextFormatCombo->currentIndex()).toInt()));
+    calendar->setHeaderTextFormat(format);
+}
+```
+
+ Git команды:
+```bash
+git checkout feature/implementation
+git add src_lib/window.cpp
+git commit -m "фича: Реализация форматирования текста
+- Добавлено создание группы форматирования
+- Реализовано управление цветами дней недели
+- Добавлено форматирование заголовков
+- Реализованы слоты обновления форматирования"
+git push origin feature/implementation
+```
+
+ День 5
+
+ Обновление кода (src_lib/window.cpp):
+```cpp
+QComboBox Window::createColorComboBox()
+{
+    QComboBox comboBox = new QComboBox;
+    comboBox->addItem(tr("Red"), QColor(Qt::red));
+    comboBox->addItem(tr("Blue"), QColor(Qt::blue));
+    comboBox->addItem(tr("Black"), QColor(Qt::black));
+    comboBox->addItem(tr("Magenta"), QColor(Qt::magenta));
+    return comboBox;
+}
+
+void Window::reformatCalendarPage()
+{
+    QTextCharFormat mayFirstFormat;
+    if (mayFirstCheckBox && mayFirstCheckBox->isChecked())
+        mayFirstFormat.setForeground(Qt::red);
+    calendar->setDateTextFormat(QDate(calendar->yearShown(), 5, 1), mayFirstFormat);
+
+    QTextCharFormat firstFridayFormat;
+    if (firstFridayCheckBox && firstFridayCheckBox->isChecked())
+        firstFridayFormat.setForeground(Qt::blue);
+
+    QDate firstFriday(calendar->yearShown(), calendar->monthShown(), 1);
+    while (firstFriday.dayOfWeek() != Qt::Friday)
+        firstFriday = firstFriday.addDays(1);
+    calendar->setDateTextFormat(firstFriday, firstFridayFormat);
+
+    calendar->setNavigationBarVisible(navigationCheckBox && navigationCheckBox->isChecked());
+    calendar->setGridVisible(gridCheckBox && gridCheckBox->isChecked());
+
+    if (horizontalHeaderCombo)
+        calendar->setHorizontalHeaderFormat(QCalendarWidget::HorizontalHeaderFormat(
+            horizontalHeaderCombo->currentIndex()));
+    if (verticalHeaderCombo)
+        calendar->setVerticalHeaderFormat(QCalendarWidget::VerticalHeaderFormat(
+            verticalHeaderCombo->currentIndex()));
+}
+```
+
+ Git команды:
+```bash
+git checkout feature/implementation
+git add src_lib/window.cpp
+git commit -m "фича: Завершение реализации Window
+- Добавлен метод создания цветовых комбобоксов
+- Реализовано форматирование специальных дат
+- Добавлено управление отображением сетки и навигации
+- Завершена реализация всех вспомогательных методов"
+git push origin feature/implementation
+```
+
+Разработчик B завершил реализацию всей функциональности календаря. 
+Основные моменты:
+1. Создана полная реализация конструктора и всех вспомогательных методов
+2. Реализованы все слоты для обработки событий
+3. Добавлено управление форматированием и отображением
+4. Настроена вся необходимая функциональность календаря
