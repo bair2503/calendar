@@ -1,0 +1,92 @@
+// Copyright (C) 2020 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+#ifndef WINDOW_H  // Проверяем, определен ли уже WINDOW_H
+#define WINDOW_H  // Если нет, определяем WINDOW_H
+
+#include <QWidget>      // Подключаем класс QWidget для создания виджетов
+#include <QDateTime>    // Подключаем класс QDateTime для работы с датой и временем
+
+QT_BEGIN_NAMESPACE  // Начинаем пространство имен Qt
+class QCalendarWidget;  // Предварительное объявление класса QCalendarWidget
+class QCheckBox;        // Предварительное объявление класса QCheckBox
+class QComboBox;        // Предварительное объявление класса QComboBox
+class QDate;            // Предварительное объявление класса QDate
+class QDateEdit;        // Предварительное объявление класса QDateEdit
+class QGridLayout;      // Предварительное объявление класса QGridLayout
+class QGroupBox;        // Предварительное объявление класса QGroupBox
+class QLabel;           // Предварительное объявление класса QLabel
+QT_END_NAMESPACE  // Завершаем пространство имен Qt
+
+//! [0]
+class Window : public QWidget  // Определяем класс Window, наследующий от QWidget
+{
+    Q_OBJECT  // Макрос для поддержки сигналов и слотов в классе
+
+public:
+    Window(QWidget *parent = nullptr);  // Конструктор класса Window
+
+private slots:  // Слоты для обработки сигналов
+    void localeChanged(int index);  // Обработка изменения локали
+    void firstDayChanged(int index);  // Обработка изменения первого дня недели
+    void selectionModeChanged(int index);  // Обработка изменения режима выбора
+    void horizontalHeaderChanged(int index);  // Обработка изменения горизонтального заголовка
+    void verticalHeaderChanged(int index);  // Обработка изменения вертикального заголовка
+    void selectedDateChanged();  // Обработка изменения выбранной даты
+    void minimumDateChanged(QDate date);  // Обработка изменения минимальной даты
+    void maximumDateChanged(QDate date);  // Обработка изменения максимальной даты
+    void weekdayFormatChanged();  // Обработка изменения формата дней недели
+    void weekendFormatChanged();  // Обработка изменения формата выходных
+    void reformatHeaders();  // Переформатирование заголовков
+    void reformatCalendarPage();  // Переформатирование страницы календаря
+
+private:
+    void createPreviewGroupBox();  // Создание группы предварительного просмотра
+    void createGeneralOptionsGroupBox();  // Создание группы общих параметров
+    void createDatesGroupBox();  // Создание группы дат
+    void createTextFormatsGroupBox();  // Создание группы текстовых форматов
+    QComboBox *createColorComboBox();  // Создание комбинированного поля для выбора цвета
+
+    // Объявление переменных для групповых ящиков и элементов управления
+    QGroupBox *previewGroupBox;  // Группа для предварительного просмотра
+    QGridLayout *previewLayout;  // Сетка для размещения элементов в группе предварительного просмотра
+    QCalendarWidget *calendar;  // Указатель на виджет календаря
+
+    QGroupBox *generalOptionsGroupBox;  // Группа для общих параметров
+    QLabel *localeLabel;  // Метка для локали
+    QLabel *firstDayLabel;  // Метка для первого дня недели
+//! [0]
+    QLabel *selectionModeLabel;  // Метка для режима выбора
+    QLabel *horizontalHeaderLabel;  // Метка для горизонтального заголовка
+    QLabel *verticalHeaderLabel;  // Метка для вертикального заголовка
+    QComboBox *localeCombo;  // Комбинированное поле для выбора локали
+    QComboBox *firstDayCombo;  // Комбинированное поле для выбора первого дня недели
+    QComboBox *selectionModeCombo;  // Комбинированное поле для выбора режима выбора
+    QCheckBox *gridCheckBox;  // Флажок для отображения сетки
+    QCheckBox *navigationCheckBox;  // Флажок для отображения навигации
+    QComboBox *horizontalHeaderCombo;  // Комбинированное поле для выбора горизонтального заголовка
+    QComboBox *verticalHeaderCombo;  // Комбинированное поле для выбора вертикального заголовка
+
+    QGroupBox *datesGroupBox;  // Группа для дат
+    QLabel *currentDateLabel;  // Метка для текущей даты
+    QLabel *minimumDateLabel;  // Метка для минимальной даты
+    QLabel *maximumDateLabel;  // Метка для максимальной даты
+    QDateEdit *currentDateEdit;  // Поле для редактирования текущей даты
+    QDateEdit *minimumDateEdit;  // Поле для редактирования минимальной даты
+    QDateEdit *maximumDateEdit;  // Поле для редактирования максимальной даты
+
+    QGroupBox *textFormatsGroupBox;  // Группа для текстовых форматов
+    QLabel *weekdayColorLabel;  // Метка для цвета дней недели
+    QLabel *weekendColorLabel;  // Метка для цвета выходных
+    QLabel *headerTextFormatLabel;  // Метка для формата текста заголовка
+    QComboBox *weekdayColorCombo;  // Комбинированное поле для выбора цвета дней недели
+    QComboBox *weekendColorCombo;  // Комбинированное поле для выбора цвета выходных
+    QComboBox *headerTextFormatCombo;  // Комбинированное поле для выбора формата текста заголовка
+
+    QCheckBox *firstFridayCheckBox;  // Флажок для первого пятницы месяца
+//! [1]
+    QCheckBox *mayFirstCheckBox;  // Флажок для первого мая
+};
+//! [1]
+
+#endif  // Завершаем условную компиляцию для WINDOW_H

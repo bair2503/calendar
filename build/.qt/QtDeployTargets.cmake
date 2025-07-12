@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_calendarqt_FILE /Users/Skippi/calendarQt/build/calendarqt)
+set(__QT_DEPLOY_TARGET_calendarqt_TYPE EXECUTABLE)

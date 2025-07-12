@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/Users/Skippi/calendarQt/build",
+  "command": "/usr/bin/clang++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/Skippi/calendarQt/build/calendarqt_autogen/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -mmacosx-version-min=15.4 -o CMakeFiles/calendarqt.dir/calendarqt_autogen/mocs_compilation.cpp.o -c /Users/Skippi/calendarQt/build/calendarqt_autogen/mocs_compilation.cpp",
+  "file": "/Users/Skippi/calendarQt/build/calendarqt_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/calendarqt.dir/calendarqt_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/Users/Skippi/calendarQt/build",
+  "command": "/usr/bin/clang++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/Skippi/calendarQt/build/calendarqt_autogen/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -mmacosx-version-min=15.4 -o CMakeFiles/calendarqt.dir/main.cpp.o -c /Users/Skippi/calendarQt/main.cpp",
+  "file": "/Users/Skippi/calendarQt/main.cpp",
+  "output": "CMakeFiles/calendarqt.dir/main.cpp.o"
+},
+{
+  "directory": "/Users/Skippi/calendarQt/build",
+  "command": "/usr/bin/clang++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/Skippi/calendarQt/build/calendarqt_autogen/include -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -mmacosx-version-min=15.4 -o CMakeFiles/calendarqt.dir/src_lib/mainwindow.cpp.o -c /Users/Skippi/calendarQt/src_lib/mainwindow.cpp",
+  "file": "/Users/Skippi/calendarQt/src_lib/mainwindow.cpp",
+  "output": "CMakeFiles/calendarqt.dir/src_lib/mainwindow.cpp.o"
+}
+]

@@ -1,0 +1,50 @@
+# Copyright (C) 2022 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+# Устанавливаем минимальную версию CMake, необходимую для сборки проекта
+cmake_minimum_required(VERSION 3.16)
+
+# Задаем имя проекта и указываем, что он использует язык C++
+project(calendarwidget LANGUAGES CXX)
+
+# Находим пакет Qt6 и необходимые компоненты для проекта
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+
+# Настраиваем стандартный проект Qt
+qt_standard_project_setup()
+
+# Создаем исполняемый файл с именем calendarwidget
+# Указываем исходные файлы, которые будут использованы для сборки
+qt_add_executable(calendarwidget
+    main.cpp          # Основной файл приложения
+    window.cpp        # Файл с реализацией окна
+    window.h          # Заголовочный файл окна
+)
+
+# Устанавливаем свойства для целевого исполняемого файла
+set_target_properties(calendarwidget PROPERTIES
+    WIN32_EXECUTABLE TRUE   # Указывает, что это Windows исполняемый файл
+    MACOSX_BUNDLE TRUE      # Указывает, что это MacOS пакет
+)
+
+# Связываем библиотеки с исполняемым файлом
+target_link_libraries(calendarwidget PRIVATE
+    Qt6::Core    # Основная библиотека Qt
+    Qt6::Gui     # Библиотека для работы с графическим интерфейсом
+    Qt6::Widgets  # Библиотека для виджетов Qt
+)
+
+# Указываем, как устанавливать целевой исполняемый файл
+install(TARGETS calendarwidget
+    BUNDLE  DESTINATION .               # Устанавливаем в текущую директорию
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}  # Устанавливаем исполняемые файлы
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # Устанавливаем библиотеки
+)
+
+# Временно убираем вызов qt6_generate_deploy_app_script
+# qt6_generate_deploy_app_script(
+#     deploy_script
+#     TARGET calendarwidget
+# )
+
+# install(SCRIPT ${deploy_script})  # Убираем временно

@@ -1,0 +1,14 @@
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+#include <QApplication>  // Подключаем класс QApplication для работы с приложением Qt
+
+#include "window.h"      // Подключаем заголовочный файл класса Window
+
+int main(int argv, char *args[])  // Главная функция приложения
+{
+    QApplication app(argv, args);  // Создаем объект QApplication, который управляет управлением приложением
+    Window window;                  // Создаем объект класса Window (основное окно приложения)
+    window.show();                  // Отображаем окно на экране
+    return app.exec();              // Запускаем главный цикл обработки событий приложения
+}
